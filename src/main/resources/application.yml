@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: jpa-test
+  datasource:
+    url: jdbc:mysql://192.168.1.196:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true
+    username: root
+    password: yfiips123456
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  jpa:
+    database: MYSQL
+    hibernate:
+      ddl-auto: update
+      naming:
+        #strategy: org.hibernate.cfg.ImprovedNamingStrategy   # create_time
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl   #createTime
+    show-sql: true
+  #配置全局时间返回格式
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+server:
+  port: 80
+
+
