@@ -1,6 +1,7 @@
 package com.ftibw.controller;
 
 import com.ftibw.service.IamgateWebService;
+import com.ftibw.service.IamgateWsResponse;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
@@ -25,7 +26,7 @@ public class TestController {
     public static final String IAM_WS_URL = "http://10.240.41.10:31201/iamgate/services/IamgateWebService?wsdl";
 
     @GetMapping(value = "/acs")
-    public String addUser(HttpServletRequest req, HttpSession session, Model model) throws Exception {
+    public String addUser(HttpServletRequest req, HttpSession session, Model model) {
         //统一接口认证
         String sessionToken = req.getParameter("sessionToken");
         String appId = req.getParameter("appId");
@@ -65,6 +66,7 @@ public class TestController {
     }
 
     private boolean verifyToken(String sessionToken, String appId, String iamToken) {
+        boolean ret = false;
         JaxWsProxyFactoryBean jaxWsProxyFactoryBean = new JaxWsProxyFactoryBean();
         jaxWsProxyFactoryBean.setAddress(IAM_WS_URL);
         jaxWsProxyFactoryBean.setServiceClass(IamgateWebService.class);
@@ -76,6 +78,13 @@ public class TestController {
         policy.setConnectionTimeout(1000);
         policy.setReceiveTimeout(1000);
         conduit.setClient(policy);
-        return "success".equals(iamService.verifySessionAgain(sessionToken, appId, iamToken).getStatus());
+
+        try {
+            IamgateWsResponse wsResp = iamService.verifySessionAgain(sessionToken, appId, iamToken);
+            ret = "success".equals(wsResp.getStatus());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 }
