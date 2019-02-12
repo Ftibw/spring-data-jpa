@@ -41,7 +41,7 @@ public class TestController {
         }
         * */
         if (!verifyToken(sessionToken, appId, iamToken)) {
-            return null;
+            return "/login";
         }
         session.setAttribute("sessionToken", sessionToken);
         //读取响应参数
@@ -82,8 +82,7 @@ public class TestController {
         try {
             IamgateWsResponse wsResp = iamService.verifySessionAgain(sessionToken, appId, iamToken);
             ret = "success".equals(wsResp.getStatus());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
         return ret;
     }
