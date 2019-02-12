@@ -1,5 +1,11 @@
 package com.ftibw.controller;
 
+import com.ftibw.service.IamgateWebService;
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,12 +22,26 @@ import java.util.Map;
 @Controller
 public class TestController {
 
-    @GetMapping(value = "/acs")
-    public String addUser(HttpServletRequest req, HttpSession session, Model model) {
-        // TODO soap 统一接口认证
-        String iamToken = req.getParameter("iamToken");
-        String sessionToken = req.getParameter("sessionToken");
+    public static final String IAM_WS_URL = "http://10.240.41.10:31201/iamgate/services/IamgateWebService?wsdl";
 
+    @GetMapping(value = "/acs")
+    public String addUser(HttpServletRequest req, HttpSession session, Model model) throws Exception {
+        //统一接口认证
+        String sessionToken = req.getParameter("sessionToken");
+        String appId = req.getParameter("appId");
+        String iamToken = req.getParameter("iamToken");
+        /*
+        JaxWsDynamicClientFactory dcflient = JaxWsDynamicClientFactory.newInstance();
+        Client client = dcflient.createClient(IAM_WS_URL);
+        Object[] objects = client.invoke("verifySessionAgain", sessionToken, appId, iamToken);
+        //status, message, code
+        if (!"success".equals(objects[0])) {
+            return null;
+        }
+        * */
+        if (!verifyToken(sessionToken, appId, iamToken)) {
+            return null;
+        }
         session.setAttribute("sessionToken", sessionToken);
         //读取响应参数
         String samlResponseParam = req.getParameter("samlResponseParam");
@@ -42,5 +62,20 @@ public class TestController {
 
         attrs.forEach(model::addAttribute);
         return "/login";
+    }
+
+    private boolean verifyToken(String sessionToken, String appId, String iamToken) {
+        JaxWsProxyFactoryBean jaxWsProxyFactoryBean = new JaxWsProxyFactoryBean();
+        jaxWsProxyFactoryBean.setAddress(IAM_WS_URL);
+        jaxWsProxyFactoryBean.setServiceClass(IamgateWebService.class);
+
+        IamgateWebService iamService = (IamgateWebService) jaxWsProxyFactoryBean.create();
+        Client proxy = ClientProxy.getClient(iamService);
+        HTTPConduit conduit = (HTTPConduit) proxy.getConduit();
+        HTTPClientPolicy policy = new HTTPClientPolicy();
+        policy.setConnectionTimeout(1000);
+        policy.setReceiveTimeout(1000);
+        conduit.setClient(policy);
+        return "success".equals(iamService.verifySessionAgain(sessionToken, appId, iamToken).getStatus());
     }
 }
