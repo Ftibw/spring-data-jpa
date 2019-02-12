@@ -5,6 +5,7 @@ import com.ftibw.service.IamgateWsResponse;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.springframework.stereotype.Controller;
@@ -31,17 +32,8 @@ public class TestController {
         String sessionToken = req.getParameter("sessionToken");
         String appId = req.getParameter("appId");
         String iamToken = req.getParameter("iamToken");
-        /*
-        JaxWsDynamicClientFactory dcflient = JaxWsDynamicClientFactory.newInstance();
-        Client client = dcflient.createClient(IAM_WS_URL);
-        Object[] objects = client.invoke("verifySessionAgain", sessionToken, appId, iamToken);
-        //status, message, code
-        if (!"success".equals(objects[0])) {
-            return null;
-        }
-        * */
-        if (!verifyToken(sessionToken, appId, iamToken)) {
-            return "/login";
+        if (!verifyToken0(sessionToken, appId, iamToken)) {
+            return "/toIndex";
         }
         session.setAttribute("sessionToken", sessionToken);
         //读取响应参数
@@ -62,7 +54,21 @@ public class TestController {
         }.getAttributes();
 
         attrs.forEach(model::addAttribute);
-        return "/login";
+        return "/toHome";//redirect:/#!/dashboard/home
+    }
+
+
+    private boolean verifyToken0(String sessionToken, String appId, String iamToken) {
+        boolean ret = false;
+        JaxWsDynamicClientFactory dcflient = JaxWsDynamicClientFactory.newInstance();
+        Client client = dcflient.createClient(IAM_WS_URL);
+        try {
+            //status, message, code
+            Object[] objects = client.invoke("verifySessionAgain", sessionToken, appId, iamToken);
+            ret = "success".equals(objects[0]);
+        } catch (Exception ignored) {
+        }
+        return ret;
     }
 
     private boolean verifyToken(String sessionToken, String appId, String iamToken) {
