@@ -2,7 +2,7 @@ spring:
   application:
     name: jpa-test
   datasource:
-    url: jdbc:mysql://192.168.1.196:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true
+    url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true
     username: root
     password: yfiips123456
     driver-class-name: com.mysql.jdbc.Driver
@@ -19,6 +19,12 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  #静态资源目录,页面模板目录,注意路径中的最后一个/
+  resources:
+    static-locations: file:C:/Users/ftibw/Desktop/webContent/
+  thymeleaf:
+    prefix: file:C:/Users/ftibw/Desktop/webContent
+    cache: false
 server:
   port: 80
 
