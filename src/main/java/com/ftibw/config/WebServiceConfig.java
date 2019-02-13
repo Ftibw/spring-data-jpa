@@ -19,11 +19,11 @@ public class WebServiceConfig {
 
     /**
      * 自定义services目录名称时,方法名不能为dispatcherServlet,否则会使其他接口转发无效
-     * 不修改目录,使用默认配置时不用新建该Bean
+     * 不修改目录时,不用新建该Bean
+     * 默认urlMapping为/services/*
      */
     @Bean
     public ServletRegistrationBean disServlet() {
-        //默认    /services/*
         return new ServletRegistrationBean(new CXFServlet(), "/iamgate/services/*");
     }
 
