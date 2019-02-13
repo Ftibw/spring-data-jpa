@@ -1,5 +1,7 @@
 package com.ftibw.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ftibw.service.IamgateWebService;
 import com.ftibw.service.IamgateWsResponse;
 import org.apache.cxf.endpoint.Client;
@@ -24,7 +26,10 @@ import java.util.Map;
 @Controller
 public class TestController {
 
-    public static final String IAM_WS_URL = "http://10.240.41.10:31201/iamgate/services/IamgateWebService?wsdl";
+    public static final ObjectMapper MAPPER = new ObjectMapper();
+
+    //10.240.41.10
+    public static final String IAM_WS_URL = "http://127.0.0.1:31201/iamgate/services/IamgateWebService?wsdl";
 
     @GetMapping(value = "/acs")
     public String addUser(HttpServletRequest req, HttpSession session, Model model) {
@@ -65,7 +70,18 @@ public class TestController {
         try {
             //status, message, code
             Object[] objects = client.invoke("verifySessionAgain", sessionToken, appId, iamToken);
-            ret = "success".equals(objects[0]);
+            Object respObj = objects[0];
+            String respJson;
+            if (respObj instanceof String) {
+                respJson = (String) respObj;
+            } else if (null != respObj) {
+                respJson = MAPPER.writeValueAsString(respObj);
+            } else {
+                return false;
+            }
+            Map<String, Object> map = MAPPER.readValue(respJson, new TypeReference<Map<String, Object>>() {
+            });
+            ret = "success".equals(map.get("status"));
         } catch (Exception ignored) {
         }
         return ret;

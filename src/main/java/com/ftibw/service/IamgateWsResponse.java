@@ -1,10 +1,12 @@
 package com.ftibw.service;
 
+import java.io.Serializable;
+
 /**
  * @author : Ftibw
  * @date : 2019/2/12 18:38
  */
-public class IamgateWsResponse {
+public class IamgateWsResponse implements Serializable {
 
     private String status;
     private String message;

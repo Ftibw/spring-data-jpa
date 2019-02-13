@@ -26,6 +26,6 @@ spring:
     prefix: file:C:/Users/ftibw/Desktop/webContent
     cache: false
 server:
-  port: 80
+  port: 31201
 
 
