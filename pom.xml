@@ -57,16 +57,6 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
         <!--WebService CXF依赖-->
-        <!--<dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxws</artifactId>
-            <version>3.1.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-transports-http</artifactId>
-            <version>3.1.12</version>
-        </dependency>-->
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-spring-boot-starter-jaxws</artifactId>

@@ -2,12 +2,9 @@ package com.ftibw.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ftibw.service.IamgateWebService;
-import com.ftibw.service.IamgateWsResponse;
 import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.frontend.ClientProxy;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory;
+import org.apache.cxf.transport.Conduit;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.springframework.stereotype.Controller;
@@ -16,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,6 +65,12 @@ public class TestController {
         boolean ret = false;
         JaxWsDynamicClientFactory dcflient = JaxWsDynamicClientFactory.newInstance();
         Client client = dcflient.createClient(IAM_WS_URL);
+        HTTPConduit conduit = (HTTPConduit) client.getConduit();
+        HTTPClientPolicy policy = new HTTPClientPolicy();
+        policy.setConnectionTimeout(1000);
+        policy.setReceiveTimeout(1000);
+        conduit.setClient(policy);
+
         try {
             //status, message, code
             Object[] objects = client.invoke("verifySessionAgain", sessionToken, appId, iamToken);
@@ -82,29 +86,8 @@ public class TestController {
             Map<String, Object> map = MAPPER.readValue(respJson, new TypeReference<Map<String, Object>>() {
             });
             ret = "success".equals(map.get("status"));
-        } catch (Exception ignored) {
-        }
-        return ret;
-    }
-
-    private boolean verifyToken(String sessionToken, String appId, String iamToken) {
-        boolean ret = false;
-        JaxWsProxyFactoryBean jaxWsProxyFactoryBean = new JaxWsProxyFactoryBean();
-        jaxWsProxyFactoryBean.setAddress(IAM_WS_URL);
-        jaxWsProxyFactoryBean.setServiceClass(IamgateWebService.class);
-
-        IamgateWebService iamService = (IamgateWebService) jaxWsProxyFactoryBean.create();
-        Client proxy = ClientProxy.getClient(iamService);
-        HTTPConduit conduit = (HTTPConduit) proxy.getConduit();
-        HTTPClientPolicy policy = new HTTPClientPolicy();
-        policy.setConnectionTimeout(1000);
-        policy.setReceiveTimeout(1000);
-        conduit.setClient(policy);
-
-        try {
-            IamgateWsResponse wsResp = iamService.verifySessionAgain(sessionToken, appId, iamToken);
-            ret = "success".equals(wsResp.getStatus());
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+            //logger.info("iam timeout",ex);
         }
         return ret;
     }
