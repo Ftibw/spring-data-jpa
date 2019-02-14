@@ -4,16 +4,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory;
-import org.apache.cxf.transport.Conduit;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +23,8 @@ import java.util.Map;
  */
 @Controller
 public class TestController {
+
+    private static Logger logger = LoggerFactory.getLogger("acs_log");
 
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -64,7 +66,13 @@ public class TestController {
     private boolean verifyToken0(String sessionToken, String appId, String iamToken) {
         boolean ret = false;
         JaxWsDynamicClientFactory dcflient = JaxWsDynamicClientFactory.newInstance();
-        Client client = dcflient.createClient(IAM_WS_URL);
+        Client client = null;
+        try {
+            client = dcflient.createClient(IAM_WS_URL);
+        } catch (Exception e) {
+            logger.info("iam connect failed",e);
+            return false;
+        }
         HTTPConduit conduit = (HTTPConduit) client.getConduit();
         HTTPClientPolicy policy = new HTTPClientPolicy();
         policy.setConnectionTimeout(1000);
@@ -86,8 +94,8 @@ public class TestController {
             Map<String, Object> map = MAPPER.readValue(respJson, new TypeReference<Map<String, Object>>() {
             });
             ret = "success".equals(map.get("status"));
-        } catch (Exception ex) {
-            //logger.info("iam timeout",ex);
+        } catch (Exception e) {
+            logger.info("iam socket timeout",e);
         }
         return ret;
     }

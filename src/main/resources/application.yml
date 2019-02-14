@@ -19,11 +19,11 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
-  #静态资源目录,页面模板目录,注意路径中的最后一个/
+  #静态资源目录,页面模板目录,注意静态资源路径最后带/
   resources:
-    static-locations: file:C:/Users/ftibw/Desktop/webContent/
+    static-locations: file:C:/Users/ftibw/Desktop/archive/dmbd/local/dmbd4.20181213/web/webContent/
   thymeleaf:
-    prefix: file:C:/Users/ftibw/Desktop/webContent
+    prefix: file:C:/Users/ftibw/Desktop/archive/dmbd/local/dmbd4.20181213/web/webContent
     cache: false
 server:
   port: 80
