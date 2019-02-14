@@ -8,6 +8,7 @@ import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,22 +23,25 @@ import java.util.Map;
  * @date : 2019/2/12 12:42
  */
 @Controller
-public class TestController {
+public class ACSController {
 
     private static Logger logger = LoggerFactory.getLogger("acs_log");
 
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
-    //10.240.41.10
-    public static final String IAM_WS_URL = "http://127.0.0.1:31201/iamgate/services/IamgateWebService?wsdl";
-
     @GetMapping(value = "/acs")
-    public String addUser(HttpServletRequest req, HttpSession session, Model model) {
+    public String addUser
+            (
+                    HttpServletRequest req,
+                    HttpSession session,
+                    Model model,
+                    @Value("${iam-ws.url}") String iamWsUrl
+            ) {
         //统一接口认证
         String sessionToken = req.getParameter("sessionToken");
         String appId = req.getParameter("appId");
         String iamToken = req.getParameter("iamToken");
-        if (!verifyToken0(sessionToken, appId, iamToken)) {
+        if (!verifyToken0(iamWsUrl, sessionToken, appId, iamToken)) {
             return "/toIndex";
         }
         session.setAttribute("sessionToken", sessionToken);
@@ -63,14 +67,14 @@ public class TestController {
     }
 
 
-    private boolean verifyToken0(String sessionToken, String appId, String iamToken) {
+    private boolean verifyToken0(String iamWsUrl, String sessionToken, String appId, String iamToken) {
         boolean ret = false;
         JaxWsDynamicClientFactory dcflient = JaxWsDynamicClientFactory.newInstance();
         Client client = null;
         try {
-            client = dcflient.createClient(IAM_WS_URL);
+            client = dcflient.createClient(iamWsUrl);
         } catch (Exception e) {
-            logger.info("iam connect failed",e);
+            logger.info("iam connect failed", e);
             return false;
         }
         HTTPConduit conduit = (HTTPConduit) client.getConduit();
@@ -95,7 +99,7 @@ public class TestController {
             });
             ret = "success".equals(map.get("status"));
         } catch (Exception e) {
-            logger.info("iam socket timeout",e);
+            logger.info("iam socket timeout", e);
         }
         return ret;
     }
