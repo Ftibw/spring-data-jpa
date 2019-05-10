@@ -3,8 +3,8 @@ spring:
     name: jpa-test
   datasource:
     url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&useSSL=true
-    username: root
-    password: yfiips123456
+    username: nled
+    password: abcd1234
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
   jpa:
@@ -26,7 +26,7 @@ spring:
     prefix: file:C:/Users/ftibw/Desktop/archive/dmbd/local/dmbd4.20181213/web/webContent
     cache: false
 server:
-  port: 80
+  port: 8080
 ---
 iam-ws:
   url: http://127.0.0.1:31201/iamgate/services/IamgateWebService?wsdl  #10.240.41.10
