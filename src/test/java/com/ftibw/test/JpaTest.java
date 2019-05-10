@@ -1,7 +1,7 @@
 package com.ftibw.test;
 
 import com.ftibw.bean.User;
-import com.ftibw.service.UserServiceImpl;
+import com.ftibw.service.impl.UserServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
